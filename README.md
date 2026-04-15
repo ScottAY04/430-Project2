@@ -1,2 +1,2 @@
-# 430-Project-1
-Repo for a class project
+# DomoMaker-DE
+Continuing the DomoMaker assignments in a separate repo
