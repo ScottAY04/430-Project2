@@ -58,6 +58,10 @@ const signup = async (req,res)=> {
     }
 }
 
+const BuyPremium = async (req, res) => {
+    
+}
+
 module.exports = {
     loginPage,
     logout,

@@ -3,20 +3,20 @@ const React = require('react');
 const {useState, useEffect} = React;
 const {createRoot} = require('react-dom/client');
 
-const handleDomo = (e, onDomoAdded) => {
+const handleGunpla = (e, onGunplaAdded) => {
     e.preventDefault();
     helper.hideError();
 
-    const name = e.target.querySelector('#domoName').value;
-    const age = e.target.querySelector('#domoAge').value;
-    const height = e.target.querySelector('#domoheight').value;
+    const name = e.target.querySelector('#gunplaName').value;
+    const grade = e.target.querySelector('#gunplaGrade').value;
+    const price = e.target.querySelector('#gunplaPrice').value;
 
-    if(!name || ! age){
+    if(!name || !grade || !price){
         helper.handleError('All fields are required');
         return false;
     }
 
-    helper.sendPost(e.target.action, {name, age, height}, onDomoAdded);
+    helper.sendPost(e.target.action, {name, grade, price}, onGunplaAdded);
     return false;
 }
 
@@ -44,63 +44,85 @@ const AlterDomo = (e, onDomoChange) => {
     return false;
 }
 
-const DomoForm = (props) => {
+const GunplaForm = (props) => {
     return(
-        <form id="domoForm"
-            onSubmit={(e)=> handleDomo(e, props.triggerReload)}
-            name="domoForm"
+        <form id="gunplaForm"
+            onSubmit={(e)=> handleGunpla(e, props.triggerReload)}
+            name="gunplaForm"
             action="/maker"
             method="POST"
-            className="domoForm"
+            className="gunplaForm"
         >
             <label htmlFor="name">Name: </label>
-            <input id='domoName' type='text' name='name' placeholder='Domo Name'/>
-            <label htmlFor='age'>Age: </label>
-            <input id='domoAge' type='number' min="0" name='age' />
-            <label htmlFor='height'>Height: </label>
-            <input id='domoHeight' type='number' min="0" name='height' />
-            <input className='makeDomoSubmit' type='submit' value="Make Domo" />
+            <input id='gunplaName' type='text' name='name' placeholder='Gunpla Model'/>
+            <label htmlFor='grade'>Grade: </label>
+            <select name="grade" id="gunplaGrade">
+                <option value="HG">HG</option>
+                <option value="RG">RG</option>
+                <option value="MG">MG</option>
+                <option value="PG">PG</option>
+            </select>
+            <label htmlFor='price'>Price: </label>
+            <input id='gunplaPrice' type='number' min="0" name='height' />
+            <input className='makeGunplaSubmit' type='submit' value="Add Gunpla" />
         </form>
     );
 }
 
-const DomoList = (props) => {
-    const [domos, setDomos] = useState(props.domos);
+const GunplaList = (props) => {
+    const [gunplas, setGunplas] = useState(props.gunplas);
 
     useEffect(() => {
         const loadDomosFromServer = async () => {
-            const response = await fetch('/getDomos');
+            const response = await fetch('/getGunplas');
             const data = await response.json();
-            setDomos(data.domos);
+            setGunplas(data.gunplas);
         };
         loadDomosFromServer();
-    }, [props.reloadDomos]);
+    }, [props.reloadGunplas]);
 
     //if there is nothing inside the data returns this
-    if(domos.length === 0){
+    if(gunplas.length === 0){
         return(
-            <div className="domoList">
-                <h3 className='emptyDomo'>No Domos Yet!</h3>
+            <div className="gunplaList">
+                <h3 className='emptyGunpla'>No Models Yet!</h3>
             </div>
         );
     }
 
 
     //returns this if there is data
-    const domoNodes = domos.map(domo => {
+    const gunplaNodes = gunplas.map(gunpla => {
+
+        let src = "/assets/img";
+        if(gunpla.grade === 'HG'){
+            src += "/highgrade.png"
+        }
+         if(gunpla.grade === 'RG'){
+            src += "/realgrade.png"
+        }
+         if(gunpla.grade === 'MG'){
+            src += "/mastergrade.png"
+        }
+         if(gunpla.grade === 'PG'){
+            src += "/perfectgrade.png"
+        }
+
         return(
-            <div key={domo.id} className='domo'>
-                <img src="/assets/img/domoface.jpeg" alt="domo face" className='domoFace' />
-                <h3 className='domoName'>Name: {domo.name}</h3>
-                <h3 className='domoAge'>Age: {domo.age}</h3>
-                <h3 className='domoHeight'>Height: {domo.height}</h3>
+            <div key={gunpla.id} className='gunpla'>
+                <img src={src} alt="grade " className='gradePic' />
+                <h3 className='gunplaName'>Name: {gunpla.name}</h3>
+                <h3 className='gunplaGrade'>Grade: {gunpla.grade}</h3>
+                <h3 className='gunplaPrice'>Price: {gunpla.price}</h3>
+                <label for='built' className='gunplaBuilt'>Finished Building</label>
+                <input type='checkbox' id='built' name='built' value='Built' />
             </div>
         );
     });
 
     return(
-        <div className='domoList'>
-            {domoNodes}
+        <div className='gunplaList'>
+            {gunplaNodes}
         </div>
     );
 }
@@ -127,19 +149,19 @@ const ChangeDomo = (props) => {
 }
 
 const App = () => {
-    const [reloadDomos, setReloadDomos] = useState(false);
+    const [reloadGunplas, setReloadGunplas] = useState(false);
 
     return(
         <div>
-            <div id="makeDomo">
-                <DomoForm triggerReload={() => setReloadDomos(!reloadDomos)} />
+            <div id="makeGunpla">
+                <GunplaForm triggerReload={() => setReloadGunplas(!reloadGunplas)} />
             </div>
-            <div id="domos">
-                <DomoList domos={[]} reloadDomos={reloadDomos} />
+            <div id="gunplas">
+                <GunplaList gunplas={[]} reloadGunplas={reloadGunplas} />
             </div>
-            <div id='domoChange'>
+            {/* <div id='domoChange'>
                 <ChangeDomo triggerReload={() => setReloadDomos(!reloadDomos)} />
-            </div>
+            </div> */}
         </div>
     );
 };
