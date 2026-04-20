@@ -58,7 +58,55 @@ const signup = async (req,res)=> {
     }
 }
 
-const BuyPremium = async (req, res) => {
+const changePassword = async (req, res) => {
+    //grabs the requests body params
+    const username = req.body.username;
+    const pass = req.body.pass;
+    const pass2 = req.body.pass2;
+
+    //returns a bad request if any fields are missing
+    if(!username || !pass || !pass2){
+        return res.status(400).json({ error: 'All fields are required!'});
+    }
+
+    //if the passwords are not matching it will say the passwords don't match
+    if(pass !== pass2){
+        return res.status(400).json({ error: 'Passwords do not match!'});
+    }
+
+    //tries to change the password if it doesn't work it throws an error
+    try{
+
+        const hash = await Account.generateHash(pass);
+        const oldAccount = await Account.find({username: username}).lean().exec();
+
+        console.log(oldAccount);
+
+        if(oldAccount.length === 0){
+            return res.status(400).json({error: 'No such account exists.'});
+        }
+
+        //isnt working
+        if(oldAccount === hash){
+            return res.json({error: 'Password is the same as old password.'});
+        }
+
+        await Account.updateOne({
+                username: username
+            },
+            {$set:{
+                password: hash
+            }
+        })
+
+        return res.status(201).json({ redirect: '/login' });
+    }catch(err){
+        console.log(err);
+        return res.status(500).json({ error: 'An error occured!' });
+    }
+}
+
+const GetPremium = async (req, res) => {
     
 }
 
@@ -67,4 +115,5 @@ module.exports = {
     logout,
     login,
     signup,
+    changePassword
 }

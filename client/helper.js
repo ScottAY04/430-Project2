@@ -19,9 +19,7 @@ const sendPost = async (url, data, handler) => {
     body: JSON.stringify(data),
   });
 
-  console.log(response.body);
   const result = await response.json();
-  console.log(result);
   document.getElementById('domoMessage').classList.add('hidden');
 
   if(result.redirect) {

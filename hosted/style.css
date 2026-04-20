@@ -188,6 +188,29 @@ nav:nth-child(1) {
     font-style: italic;
 }
 
+#filterModels{
+    width: 40%;
+    align-content: center;
+    margin: 0 auto;
+    padding-left: 10em;
+    color: white;
+    padding-top: 30px;
+    font-size: 2rem;
+    background-color: #4d4d4d;
+    border: 2px solid #3b3b3b;
+}
+
+.filterForm select{
+    height: 4%;
+    font-size: 90%;
+}
+
+.filterForm input{
+    height: 4%;
+    font-size: 80%;
+    margin-left: 10px;
+}
+
 #gunpla {
     z-index: 225;
     margin-top: -20px;
@@ -200,12 +223,12 @@ nav:nth-child(1) {
 }
 
 #gunplas {
-    width: 40%;
+    width: 70%;
     min-width: 400px;
     border: 2px solid #c52e2e;
     border-radius: 4px;
     margin: 0 auto;
-    margin-top: 100px;
+    margin-top: 10px;
 }
 
 .gunpla {
