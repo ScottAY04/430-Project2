@@ -106,9 +106,6 @@ const changePassword = async (req, res) => {
     }
 }
 
-const GetPremium = async (req, res) => {
-    
-}
 
 module.exports = {
     loginPage,

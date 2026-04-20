@@ -1,4 +1,3 @@
-const { RedisStore } = require('connect-redis');
 const models = require('../models');
 const Gunpla = models.Gunpla;
 
@@ -65,10 +64,6 @@ const getGunplaByFilter = async (req, res) => {
 
 const gunplaBuilt = async (req, res) => {
     try{
-        const query = {owner: req.session.account._id};
-        console.log(req.body.built);
-        console.log(req.body.name);
-
         await Gunpla.updateOne(
             {
                 owner: req.session.account._id,
