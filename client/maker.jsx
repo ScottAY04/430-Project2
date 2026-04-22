@@ -4,6 +4,7 @@ const {useState, useEffect} = React;
 const {createRoot} = require('react-dom/client');
 
 
+
 const handleGunpla = (e, onGunplaAdded) => {
     e.preventDefault();
     helper.hideError();
@@ -46,8 +47,8 @@ const AlterDomo = (e, onDomoChange) => {
 }
 
 const FinishCheckBox = (props) => {
-
-    const modelID = props.gunpla[0]._id;
+    console.log(props.id);
+    const modelID = props.gunpla._id;
 
     const [isChecked, checkHandler] = useState(() => {
         const saved = localStorage.getItem(modelID);
@@ -60,13 +61,11 @@ const FinishCheckBox = (props) => {
 
     const changeState = (e) => {
         checkHandler(!isChecked);
-        const name = props.gunpla[0].name;
-        const grade = props.gunpla[0].grade;
+        const name = props.gunpla.name;
+        const grade = props.gunpla.grade;
         const built = !isChecked;
 
-
-
-        helper.sendPost('/finished', {name, grade, built}, props.props[0].reloadGunplas);
+        helper.sendPost('/finished', {name, grade, built}, props.props.reloadGunplas);
     }
 
     return(
@@ -111,7 +110,7 @@ const FilteredForm = (props) => {
         <form id='filterForm'
         name='filterForm'
         action='/filtered'
-        onSubmit={(e) => FilterGunpla(e, props)}
+        onSubmit={(e) => FilterGunpla(e, props.reloadGunplas)}
         className='filterForm'>
             <label htmlFor='searchSelector'>Filter by: </label>
             <select name='grade' id='grade'>
@@ -126,8 +125,6 @@ const FilteredForm = (props) => {
 }
 
 const FilterGunpla = (e, props) =>{
-    e.preventDefault();
-    helper.hideError();
 
     const [gunplas, setGunplas] = useState([]);
     const filterOption = e.target.querySelector('.filterForm').getElementById('grade').value;
@@ -182,7 +179,6 @@ const FilterGunpla = (e, props) =>{
         );
     });
 
-
     return(
         <div className='gunplaList'>
             {gunplaNodes}
@@ -190,30 +186,23 @@ const FilterGunpla = (e, props) =>{
     );
 }
 
-const GunplaList = (props) => {
-    const [gunplas, setGunplas] = useState(props.gunplas);
+const GunplaList = async () => {
 
-    useEffect(() => {
-        const loadGunplasFromServer = async () => {
-            const response = await fetch('/getGunplas');
-            const data = await response.json();
-            setGunplas(data.gunplas);
-        };
-        loadGunplasFromServer();
-    }, [props.reloadGunplas]);
+    const response = await fetch('/getGunplas');
+    const data = await response.json();
+    const temp = data.gunplas;
+
 
     //if there is nothing inside the data returns this
-    if(gunplas.length === 0){
+    if(temp.length === 0){
         return(
-            <div className="gunplaList">
-                <h3 className='emptyGunpla'>No Models Yet!</h3>
-            </div>
+            <h3 className='emptyGunpla'>No Models Yet!</h3>
         );
     }
 
 
     //returns this if there is data
-    const gunplaNodes = gunplas.map(gunpla => {
+    const gunplaNodes = temp.map(gunpla => {
 
         let src = "/assets/img";
         if(gunpla.grade === 'HG'){
@@ -238,16 +227,12 @@ const GunplaList = (props) => {
                 <h3 className='gunplaGrade'>Grade: {gunpla.grade}</h3>
                 <h3 className='gunplaPrice'>Price: {gunpla.price}</h3>
                 <label for='built' className='gunplaBuilt'>Finished Building</label>
-                <FinishCheckBox gunpla={[gunpla]} props={[props]} id={[document.querySelector('id')]} />
+                <FinishCheckBox gunpla={gunpla} props={temp} id={document.querySelector('.gunpla')} />
             </div>
         );
     });
 
-    return(
-        <div className='gunplaList'>
-            {gunplaNodes}
-        </div>
-    );
+    return gunplaNodes;
 }
 
 const ChangeDomo = (props) => {
@@ -273,26 +258,26 @@ const ChangeDomo = (props) => {
 
 const App = () => {
     const [reloadGunplas, setReloadGunplas] = useState(false);
-    const [filterGunplasList, SetForm] = useState(<GunplaList gunplas={[]} reloadGunplas={reloadGunplas}/>);
+    const [GunplaFinalList, SetForm] = useState(<div id="gunplaList">Base</div>);
 
     const changeGunplaList = (e) => {
-        SetForm(<FilterGunpla gunplas={[]} reloadGunplas={reloadGunplas} />)
+
     }
 
+    useEffect(() => {
+        SetForm(GunplaList());
+    }, reloadGunplas);
 
     const finalRenderPage = 
         <div>
             <div id="makeGunpla">
                 <GunplaForm triggerReload={() => setReloadGunplas(!reloadGunplas)} />
             </div>
-            <div id="filterModels" >
-                <FilteredForm gunplas={[]} reloadGunplas={reloadGunplas} />
+            <div id="filterModels" onChange={(e) => changeGunplaList(e)}>
+                <FilteredForm gunplas={[GunplaFinalList]} setForm={(list) => setForm(list)} reloadGunplas={reloadGunplas} />
             </div>
-            {/* <div id="gunplas">
-                <GunplaList gunplas={[]} reloadGunplas={reloadGunplas} />
-            </div> */}
             <div id="gunplas">
-                {filterGunplasList}
+                {GunplaFinalList}
             </div>
         </div>;
 
