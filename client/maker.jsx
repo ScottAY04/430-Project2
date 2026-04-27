@@ -3,8 +3,6 @@ const React = require('react');
 const {useState, useEffect} = React;
 const {createRoot} = require('react-dom/client');
 
-
-
 const handleGunpla = (e, onGunplaAdded) => {
     e.preventDefault();
     helper.hideError();
@@ -47,7 +45,6 @@ const AlterDomo = (e, onDomoChange) => {
 }
 
 const FinishCheckBox = (props) => {
-    console.log(props.id);
     const modelID = props.gunpla._id;
 
     const [isChecked, checkHandler] = useState(() => {
@@ -98,22 +95,22 @@ const GunplaForm = (props) => {
                 <option value="MG">MG</option>
                 <option value="PG">PG</option>
             </select>
-            <label htmlFor='price'>Price: </label>
+            <label htmlFor='price'>Price: ¥</label>
             <input id='gunplaPrice' type='number' min="0" name='height' />
             <input className='makeGunplaSubmit' type='submit' checked='false' value="Add Gunpla" />
         </form>
     );
 }
 
-const FilteredForm = (props) => {
+const FilteredForm = () => {
     return(
         <form id='filterForm'
         name='filterForm'
         action='/filtered'
-        onSubmit={(e) => FilterGunpla(e, props.reloadGunplas)}
         className='filterForm'>
             <label htmlFor='searchSelector'>Filter by: </label>
             <select name='grade' id='grade'>
+                <option value="All">All</option>
                 <option value="HG">HG</option>
                 <option value="RG">RG</option>
                 <option value="MG">MG</option>
@@ -124,21 +121,18 @@ const FilteredForm = (props) => {
     );
 }
 
-const FilterGunpla = (e, props) =>{
+const FilterGunpla = async (e) =>{
+    e.preventDefault();
 
-    const [gunplas, setGunplas] = useState([]);
-    const filterOption = e.target.querySelector('.filterForm').getElementById('grade').value;
+    console.log(e.target.querySelector('#grade').value);
+    const filterOption = e.target.querySelector('#grade').value;
 
-    useEffect(() => {
-        const loadGunplasFromServer = async() => {
-            const response = await fetch(`${e.target.action}?grade=${filterOption}`)
-            const data = await response.json();
-            setGunplas(data.gunplas);
-        };
-        loadGunplasFromServer();
-    }, [props.reloadGunplas]);
+    const response = await fetch(`${e.target.action}?grade=${filterOption}`)
+    const data = await response.json();
+    const temp = data.gunplas;
 
-        if(gunplas.length === 0){
+
+        if(temp.length === 0){
         return(
             <div className="gunplaList">
                 <h3 className='emptyGunpla'>No Models in this Grade!</h3>
@@ -147,7 +141,7 @@ const FilterGunpla = (e, props) =>{
     }
 
     //returns this if there is data
-    const gunplaNodes = gunplas.map(gunpla => {
+    const gunplaNodes = temp.map(gunpla => {
 
         //loads the images
         let src = "/assets/img";
@@ -174,22 +168,19 @@ const FilterGunpla = (e, props) =>{
                 <h3 className='gunplaGrade'>Grade: {gunpla.grade}</h3>
                 <h3 className='gunplaPrice'>Price: {gunpla.price}</h3>
                 <label for='built' className='gunplaBuilt'>Finished Building</label>
-                <input type='checkbox' id='built' name='built' value='Built' />
+                <FinishCheckBox gunpla={gunpla} props={temp} id={document.querySelector('.gunpla')} />
             </div>
         );
     });
 
-    return(
-        <div className='gunplaList'>
-            {gunplaNodes}
-        </div>
-    );
+    return gunplaNodes;
 }
 
 const GunplaList = async () => {
 
     const response = await fetch('/getGunplas');
     const data = await response.json();
+    
     const temp = data.gunplas;
 
 
@@ -226,8 +217,11 @@ const GunplaList = async () => {
                 <h3 className='gunplaName'>Name: {gunpla.name}</h3>
                 <h3 className='gunplaGrade'>Grade: {gunpla.grade}</h3>
                 <h3 className='gunplaPrice'>Price: {gunpla.price}</h3>
-                <label for='built' className='gunplaBuilt'>Finished Building</label>
-                <FinishCheckBox gunpla={gunpla} props={temp} id={document.querySelector('.gunpla')} />
+                <div className='built'>
+                    <label for='built' className='gunplaBuilt'>Finished Building</label>
+                    <FinishCheckBox gunpla={gunpla} props={temp} id={document.querySelector('.gunpla')} />
+                </div>
+
             </div>
         );
     });
@@ -258,30 +252,34 @@ const ChangeDomo = (props) => {
 
 const App = () => {
     const [reloadGunplas, setReloadGunplas] = useState(false);
-    const [GunplaFinalList, SetForm] = useState(<div id="gunplaList">Base</div>);
+    const [GunplaFinalList, SetForm] = useState([]);
 
-    const changeGunplaList = (e) => {
 
-    }
-
+    //reloads the page when you make the model
     useEffect(() => {
         SetForm(GunplaList());
     }, reloadGunplas);
+
+    const changeGunplaList = (e) => {
+        SetForm(FilterGunpla(e));
+    }
 
     const finalRenderPage = 
         <div>
             <div id="makeGunpla">
                 <GunplaForm triggerReload={() => setReloadGunplas(!reloadGunplas)} />
             </div>
-            <div id="filterModels" onChange={(e) => changeGunplaList(e)}>
-                <FilteredForm gunplas={[GunplaFinalList]} setForm={(list) => setForm(list)} reloadGunplas={reloadGunplas} />
+            <div id="filterModels" onSubmit={(e) => changeGunplaList(e)}>
+                <FilteredForm />
             </div>
             <div id="gunplas">
-                {GunplaFinalList}
+                <div id='gunplaList'>
+                    {GunplaFinalList}
+                </div>
+
             </div>
+            <div id="right">Your ad goes here</div>
         </div>;
-
-
 
     return(finalRenderPage);
 };

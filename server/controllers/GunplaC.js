@@ -36,7 +36,7 @@ const getGunpla = async (req, res) => {
     try{
         const query = {owner: req.session.account._id};
         const docs = await Gunpla.find(query).select('name grade price').lean().exec();
-
+        
         return res.json({gunplas: docs}); 
     }catch(err){
         console.log(err);
@@ -51,11 +51,17 @@ const getGunplaByFilter = async (req, res) => {
         const parsedUrl = new URL(req.url, `${protocol}://${req.headers.host}`);
         const filter = parsedUrl.searchParams.get('grade');
 
+        if(filter === 'All'){
+            const query = {owner: req.session.account._id};
+            const docs = await Gunpla.find(query).select('name grade price').lean().exec();
+            return res.json({gunplas: docs});
+        }
+
         //searches up the data with the query
         const query = {owner: req.session.account._id};
         const docs = await Gunpla.find(query).find({grade: filter}).select('name grade price').lean().exec();
 
-        return res.json({gunplas: docs}, {redirect: '/maker'}); 
+        return res.status(200).json({gunplas: docs});
     }catch(err){
         console.log(err);
         return res.status(500).json({ error: 'Error retrieving gunplas!'});
@@ -74,11 +80,17 @@ const gunplaBuilt = async (req, res) => {
                 built: req.body.built
             }}
         );
-        return res.status(201).json({Message: 'Finished building this one'}, {redirect: '/maker'});
+        return res.status(201).json({Message: 'Finished building this one'});
     }catch(err){
         console.log(err);
         return res.status(500).json({ error: 'Error retrieving gunplas!'});
     }
+}
+
+const NotFound = (req, res) => {
+    return res.status(404).render('notFound', {
+        page: req.url,
+    })
 }
 
 module.exports = {
@@ -87,4 +99,5 @@ module.exports = {
     getGunpla,
     getGunplaByFilter,
     gunplaBuilt,
+    NotFound
 }

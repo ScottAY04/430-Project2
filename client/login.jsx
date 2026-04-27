@@ -81,7 +81,8 @@ const LoginWindow = (props) => {
             <input id="pass" type="password" name="pass" placeholder="password" />
             <input className="formSubmit" id="signIn" type="submit" value="Sign In" />
             
-            <div class="navlink"><a id="changePass" onClick={() => {
+            <div class="navlink"><a id="changePass" onClick={(e) => {
+                e.preventDefault();
             const root = createRoot(document.getElementById('content'));
             root.render(<ChangePassWindow />)
             }}>Forgot Password</a></div>
