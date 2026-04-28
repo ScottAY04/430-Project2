@@ -20,40 +20,15 @@ const handleGunpla = (e, onGunplaAdded) => {
     return false;
 }
 
-const AlterDomo = (e, onDomoChange) => {
-    e.preventDefault();
-    helper.hideError();
-
-    const name = e.target.querySelector('#domoNameChange').value;
-    const newAge = e.target.querySelector('#ageChange').value;
-    const newHeight = e.target.querySelector('#domoHeightChange').value;
-    
-
-    if(!name){
-        helper.handleError('Please put in a name');
-        return false;
-    }
-
-    if(!newAge && !newHeight){
-        helper.handleError('Please put in an age or height to change!');
-        return false;
-    }
-
-    console.log(name, newAge, newHeight);
-    helper.sendPost(e.target.action, {name, newAge, newHeight}, onDomoChange);
-    return false;
-}
-
 const FinishCheckBox = (props) => {
-    const modelID = props.gunpla._id;
-
-    const [isChecked, checkHandler] = useState(() => {
-        const saved = localStorage.getItem(modelID);
+    const getValue = () => {
+        const saved = localStorage.getItem(props.gunpla._id);
         return saved !== null ? JSON.parse(saved) : false;
-    });
+    }
+    const [isChecked, checkHandler] = useState(getValue());
 
     useEffect(() => {
-        localStorage.setItem(modelID, JSON.stringify(isChecked));
+       localStorage.setItem(props.gunpla._id, JSON.stringify(isChecked));
     }, [isChecked]);
 
     const changeState = (e) => {
@@ -62,20 +37,43 @@ const FinishCheckBox = (props) => {
         const grade = props.gunpla.grade;
         const built = !isChecked;
 
-        helper.sendPost('/finished', {name, grade, built}, props.props.reloadGunplas);
+        helper.sendPost('/finished', {_id: props.gunpla._id, built: built}, props.props.reloadGunplas);
     }
 
     return(
+        <div className='built' style={{backgroundColor: isChecked ? "#2f9126" : "#8a2929"}} onClick={changeState} id={props.gunpla._id}>
+            <label for='built' className='gunplaBuilt'>Finished Building</label>
             <input 
-            type='checkbox' 
-            id='built' 
-            action='/finished'
-            checked={isChecked} 
-            onChange={() => changeState()} 
-            name='built' value='Built' />
+            type='checkbox'  
+            checked={isChecked} />
+        </div>
+            
     );
 }
 
+const DeleteGunpla = async (e, _id, triggerReload) => {
+    e.preventDefault();
+    const response = await fetch(`/delete?_id=${_id}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+    triggerReload();
+    return false;
+}
+
+const DeleteModel = (props) => {
+    return(
+        <div className='delete'>
+            <label for='delete' 
+            id='delete'
+            onClick={(e)=>DeleteGunpla(e, props.id, props.triggerReload)}
+            action='/delete'
+            >Delete Model</label>
+        </div>
+    );
+}
 
 const GunplaForm = (props) => {
     return(
@@ -121,10 +119,10 @@ const FilteredForm = () => {
     );
 }
 
-const FilterGunpla = async (e) =>{
+const FilterGunpla = async (e, reload, setReloadGunplas) =>{
     e.preventDefault();
+    helper.hideError();
 
-    console.log(e.target.querySelector('#grade').value);
     const filterOption = e.target.querySelector('#grade').value;
 
     const response = await fetch(`${e.target.action}?grade=${filterOption}`)
@@ -159,30 +157,28 @@ const FilterGunpla = async (e) =>{
                 src += "/perfectgrade.png"
             }
         }
-       
+
+
 
         return(
-            <div key={gunpla.id} className='gunpla'>
+            <div key={gunpla.id} className='gunpla' id={gunpla.id}>
                 <img src={src} alt="grade " className='gradePic' />
                 <h3 className='gunplaName'>Name: {gunpla.name}</h3>
                 <h3 className='gunplaGrade'>Grade: {gunpla.grade}</h3>
                 <h3 className='gunplaPrice'>Price: {gunpla.price}</h3>
-                <label for='built' className='gunplaBuilt'>Finished Building</label>
-                <FinishCheckBox gunpla={gunpla} props={temp} id={document.querySelector('.gunpla')} />
+                <FinishCheckBox gunpla={gunpla} props={temp} />
+                <DeleteModel id={gunpla._id} triggerReload={() => setReloadGunplas(!reload)} />
             </div>
         );
     });
-
     return gunplaNodes;
 }
 
-const GunplaList = async () => {
-
+const GunplaList = async (reload, setReloadGunplas) => {
     const response = await fetch('/getGunplas');
     const data = await response.json();
     
     const temp = data.gunplas;
-
 
     //if there is nothing inside the data returns this
     if(temp.length === 0){
@@ -191,10 +187,9 @@ const GunplaList = async () => {
         );
     }
 
-
     //returns this if there is data
     const gunplaNodes = temp.map(gunpla => {
-
+        //gets the correct image depending on the grade
         let src = "/assets/img";
         if(gunpla.grade === 'HG'){
             src += "/highgrade.png"
@@ -209,19 +204,15 @@ const GunplaList = async () => {
             src += "/perfectgrade.png"
         }
 
-        const id = gunpla.id
 
         return(
-            <div key={gunpla.id} className='gunpla' id={id}>
+            <div key={gunpla.id} className='gunpla' id={gunpla.id}>
                 <img src={src} alt="grade " className='gradePic' />
                 <h3 className='gunplaName'>Name: {gunpla.name}</h3>
                 <h3 className='gunplaGrade'>Grade: {gunpla.grade}</h3>
                 <h3 className='gunplaPrice'>Price: {gunpla.price}</h3>
-                <div className='built'>
-                    <label for='built' className='gunplaBuilt'>Finished Building</label>
-                    <FinishCheckBox gunpla={gunpla} props={temp} id={document.querySelector('.gunpla')} />
-                </div>
-
+                <FinishCheckBox gunpla={gunpla} props={temp} />
+                <DeleteModel id={gunpla._id} triggerReload={() => setReloadGunplas(!reload)} />
             </div>
         );
     });
@@ -229,36 +220,14 @@ const GunplaList = async () => {
     return gunplaNodes;
 }
 
-const ChangeDomo = (props) => {
-    return(
-        <form id="domoChange"
-            onSubmit={(e)=> AlterDomo(e, props.triggerReload)}
-            name="domoChange"
-            action="/changeDomo"
-            method="POST"
-            className="domoChange"
-        >
-            <h3 className='nameChange'>Name: </h3>
-            <input id='domoNameChange' type='text' name='name' placeholder='Domo You want to Change'/>
-            <label htmlFor='ageChange'>Age: </label>
-            <input id='ageChange' type='number' min="0" name='ageChange' />
-            <label htmlFor='domoHeightChange'>Height: </label>
-            <input id='domoHeightChange' type='number' min="0" name='domoHeightChange' />
-            <input className='makeDomoSubmit' type='submit' value="Change Domo" />
-        </form>
-            
-    );
-}
-
 const App = () => {
     const [reloadGunplas, setReloadGunplas] = useState(false);
     const [GunplaFinalList, SetForm] = useState([]);
 
-
     //reloads the page when you make the model
     useEffect(() => {
-        SetForm(GunplaList());
-    }, reloadGunplas);
+        SetForm(GunplaList(reloadGunplas, setReloadGunplas));
+    }, [reloadGunplas]);
 
     const changeGunplaList = (e) => {
         SetForm(FilterGunpla(e));
@@ -276,7 +245,6 @@ const App = () => {
                 <div id='gunplaList'>
                     {GunplaFinalList}
                 </div>
-
             </div>
             <div id="right">Your ad goes here</div>
         </div>;

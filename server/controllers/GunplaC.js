@@ -35,7 +35,7 @@ const makeGunpla = async (req, res) => {
 const getGunpla = async (req, res) => {
     try{
         const query = {owner: req.session.account._id};
-        const docs = await Gunpla.find(query).select('name grade price').lean().exec();
+        const docs = await Gunpla.find(query).select('name grade price built').lean().exec();
         
         return res.json({gunplas: docs}); 
     }catch(err){
@@ -53,13 +53,13 @@ const getGunplaByFilter = async (req, res) => {
 
         if(filter === 'All'){
             const query = {owner: req.session.account._id};
-            const docs = await Gunpla.find(query).select('name grade price').lean().exec();
+            const docs = await Gunpla.find(query).select('name grade price built').lean().exec();
             return res.json({gunplas: docs});
         }
 
         //searches up the data with the query
         const query = {owner: req.session.account._id};
-        const docs = await Gunpla.find(query).find({grade: filter}).select('name grade price').lean().exec();
+        const docs = await Gunpla.find(query).find({grade: filter}).select('name grade price built').lean().exec();
 
         return res.status(200).json({gunplas: docs});
     }catch(err){
@@ -73,17 +73,29 @@ const gunplaBuilt = async (req, res) => {
         await Gunpla.updateOne(
             {
                 owner: req.session.account._id,
-                name: req.body.name,
-                grade: req.body.grade
+                _id: req.body.modelID
             },
             {$set: {
                 built: req.body.built
             }}
         );
-        return res.status(201).json({Message: 'Finished building this one'});
+        return res.status(201).json({Message: 'Finished'});
     }catch(err){
         console.log(err);
         return res.status(500).json({ error: 'Error retrieving gunplas!'});
+    }
+}
+
+const deleteGunpla = async (req, res) => {
+    try{
+        await Gunpla.deleteOne({
+            owner: req.session.account._id,
+            _id: req.query._id
+        })
+        return res.json({Message: 'Deleted'});
+    }catch(err){
+        console.log(err);
+        return res.status(500).json({error: "Couldn't detelte gunpla."});
     }
 }
 
@@ -99,5 +111,6 @@ module.exports = {
     getGunpla,
     getGunplaByFilter,
     gunplaBuilt,
+    deleteGunpla,
     NotFound
 }

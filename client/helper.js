@@ -2,6 +2,7 @@
    displays it to the user. Will be hidden by other events that could
    end in an error.
 */
+
 const handleError = (message) => {
   document.getElementById('errorMessage').textContent = message;
   document.getElementById('errorMessage').classList.remove('hidden');

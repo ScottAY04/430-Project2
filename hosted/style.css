@@ -85,7 +85,6 @@ nav:nth-child(1) {
 }
 
 .gunplaForm label {
-    
     width: 75px;
     margin-left: 5px;
     font-size: 1.2em;
@@ -125,8 +124,10 @@ nav:nth-child(1) {
     height: 300px;
     width: 350px;
     margin: 0 auto;
-    padding-top: 350px;
+    padding-top: 325px;
     font-size: 1.2em;
+    border-radius: 10px;
+    border-color: #2b2b2b;
 }
 
 .mainForm h3 {
@@ -135,9 +136,10 @@ nav:nth-child(1) {
 
 .mainForm label {
     display: inline-block;
-    width: 100px;
+    width: 290px;
     margin-right: 10px;
-    text-align: right;
+    padding-left: 50px;
+    text-align: left;
     font-size: 1.2em;
 }
 
@@ -149,9 +151,9 @@ nav:nth-child(1) {
     margin-top: 14px;
     font-size: 1.2em;
     width: 100px;
-    background-color: #55acee;
+    background-color: #606060;
     border-radius: 2px;
-    border-color: #66acee;
+    border-color: #2b2b2b;
     padding: 3px 0px;
     color: white;
     text-decoration: none;
@@ -163,13 +165,14 @@ nav:nth-child(1) {
 
 .formSubmit:hover {
     transition: background-color 0.4s ease;
-    background-color: #338acc;
+    background-color: #212121;
 }
 
 #user, #pass, #pass2 {
-    text-align: center;
+    display: flex;
+    justify-self: center;
     font-size: 1.1em;
-    width: 180px;
+    width: 280px;
     border-radius: 6px;
 }
 
@@ -184,33 +187,21 @@ nav:nth-child(1) {
 }
 
 #errorMessage {
-    top: 250px;
-    width: 250px;
-    height: 650px;
-    position: absolute;
-    z-index: 200;
-    right: 0px;
     overflow: hidden;
+    display: flex;
+    justify-self: center;
 }
 
 #errorMessage h3 {
     width: 200px;
     position: absolute;
     top: 0px;
-    left: 20px;
-}
-
-#speech {
-    height: 120px;
-    width: 250px;
-    z-index:300;
 }
 
 #errorMessage {
     font-size: 1.2em;
     font-weight: bold;
-    color: red;
-    font-style: italic;
+    color: white;
 }
 
 .container{
@@ -329,12 +320,32 @@ h3.gunplaPrice {
 }
 
 .built{
-    float: right;
-    background-color: rgb(133, 16, 16);
-    
-    width: 8em;
+    float: inline-start;
+    font-weight: bold;
+    border-radius: 5px;
+    border: 8px;
+    border-color: rgba(255,255,255, 0.8);
+    width: 10em;
     padding-top: 1.5rem;
     padding-bottom: 1.5rem;
+    padding-left: 0.5rem;
+}
+
+#built{
+   transform: scale(1.25);
+}
+
+.delete{
+    float: right;
+    font-weight: bold;
+    border-radius: 5px;
+    border: 8px;
+    background-color: rgb(190, 4, 4);
+    border-color: rgba(255,255,255, 0.8);
+    width: 7em;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+    padding-left: 0.5rem;
 }
 
 .gunpla:first-child {

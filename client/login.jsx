@@ -83,8 +83,7 @@ const LoginWindow = (props) => {
             
             <div class="navlink"><a id="changePass" onClick={(e) => {
                 e.preventDefault();
-            const root = createRoot(document.getElementById('content'));
-            root.render(<ChangePassWindow />)
+            props.root.render(<ChangePassWindow />)
             }}>Forgot Password</a></div>
         </form>
     );
@@ -138,7 +137,7 @@ const init = () => {
 
     loginButton.addEventListener('click', (e)=>{
         e.preventDefault();
-        root.render(<LoginWindow />);
+        root.render(<LoginWindow root={root}/>);
         return false;
     });
 
@@ -149,7 +148,7 @@ const init = () => {
     });
 
 
-    root.render(<LoginWindow />);
+    root.render(<LoginWindow root={root} />);
 };
 
 window.onload = init;
